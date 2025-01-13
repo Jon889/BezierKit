@@ -274,7 +274,7 @@ open class PathComponent: NSObject, Reversible, Transformable, @unchecked Sendab
         }
         return PathComponent(curves: offsetCurves)
     }
-
+	
     private static func intersectionBetween<U>(_ curve: U, _ i2: Int, _ p2: PathComponent, accuracy: CGFloat) -> [Intersection] where U: NonlinearBezierCurve {
         switch p2.order(at: i2) {
         case 0:
@@ -410,6 +410,24 @@ open class PathComponent: NSObject, Reversible, Transformable, @unchecked Sendab
         }
         return intersections
     }
+	
+	public func quickIntersects(rect: CGRect) -> Bool {
+		var intersects = false
+		self.bvh.visit { node, _ in
+			let nodeRect = node.boundingBox.cgRect
+			if !rect.intersects(nodeRect) {
+				return false // No need to check the children, as already rect doesn't intersect
+			} else if case .leaf = node.type, rect.intersects(nodeRect) {
+				intersects = true
+				return false
+			} else if rect.contains(nodeRect) { // nodeRect contains the path, so if rect fully contains nodeRect, transitively it contains the path
+				intersects = true
+				return false
+			}
+			return true
+		}
+		return intersects
+	}
 
     // MARK: -
 

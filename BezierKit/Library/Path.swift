@@ -131,6 +131,10 @@ open class Path: NSObject, @unchecked Sendable {
         return !self.intersections(with: other, accuracy: accuracy).isEmpty
     }
 
+	public func quickIntersects(rect: CGRect) -> Bool {
+		components.contains { $0.quickIntersects(rect: rect) }
+	}
+
     public func intersections(with other: Path, accuracy: CGFloat = BezierKit.defaultIntersectionAccuracy) -> [PathIntersection] {
         guard self.boundingBox.overlaps(other.boundingBox) else {
             return []
