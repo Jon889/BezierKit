@@ -25,6 +25,18 @@ open class PathComponent: NSObject, Reversible, Transformable, @unchecked Sendab
         }
     }
 
+	#if canImport(CoreGraphics)
+	public var cgPath: CGPath {
+		return self.lock.sync { self._cgPath }
+	}
+
+	private lazy var _cgPath: CGPath = {
+		let mutablePath = CGMutablePath()
+		appendPath(to: mutablePath)
+		return mutablePath.copy()!
+	}()
+	#endif
+
     private lazy var _bvh: BoundingBoxHierarchy = BoundingBoxHierarchy(boxes: (0..<self.numberOfElements).map { self.element(at: $0).boundingBox })
 
     private var _hash: Int?
